@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+:root {
+  /* Style board: rose #D4A5A5 · gold #D4AF37 · charcoal #333 · ivory #F9F8F3 */
+  --color-paper: #f9f8f3;
+  --color-surface: #f0ede4;
+  --color-ink: #333333;
+  --color-ink-muted: #5a5a5a;
+  --color-rose: #d4a5a5;
+  --color-rose-deep: #b07878;
+  --color-gold: #d4af37;
+  --container-md: 40rem;
+  --container-lg: 72rem;
+  --radius-card: 1.25rem;
+  --radius-panel: 1.75rem;
+}
+
+@theme inline {
+  --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-cormorant), ui-serif, Georgia, serif;
+  /* Large, soft shadows read more “editorial luxury” than tight drops */
+  --shadow-soft: 0 22px 55px -26px color-mix(in oklab, var(--color-ink) 18%, transparent);
+  --shadow-soft-lg: 0 32px 72px -30px color-mix(in oklab, var(--color-ink) 22%, transparent);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.65;
+  letter-spacing: 0.01em;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--color-rose) 38%, transparent);
+}
