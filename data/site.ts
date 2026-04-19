@@ -67,11 +67,11 @@ export const site = {
     },
   ],
   venue: {
-    name: "The Garden Atelier",
-    addressLines: ["12 Rue des Lilas", "Casablanca, Morocco"],
-    note: "Valet parking is available at the main entrance. Please arrive fifteen minutes early for seating.",
+    name: "fe 2abl 3abdallah",
+    addressLines: ["wara el re2aten kda :D"],
+    // note: "Valet parking is available at the main entrance. Please arrive fifteen minutes early for seating.",
     mapUrl:
-      "https://www.google.com/maps/search/?api=1&query=The+Garden+Atelier+Casablanca",
+      "https://maps.app.goo.gl/amvDZSJoT78TN8Ef8",
   },
   rsvp: {
     heading: "Kindly respond",
