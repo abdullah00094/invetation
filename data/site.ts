@@ -69,7 +69,7 @@ export const site = {
   venue: {
     name: "fe 2abl 3abdallah",
     addressLines: ["wara el re2aten kda :D"],
-    // note: "Valet parking is available at the main entrance. Please arrive fifteen minutes early for seating.",
+    note: "ew3a 7ad yet2a5r :') .",
     mapUrl:
       "https://maps.app.goo.gl/amvDZSJoT78TN8Ef8",
   },
