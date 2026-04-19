@@ -15,7 +15,7 @@ export const site = {
   /** ISO 8601 in UTC, e.g. 2026-06-14T17:00:00.000Z */
   eventDateIso: "2026-06-14T17:00:00.000Z",
   /** Shown in the hero (human-friendly) */
-  displayDate: "Saturday, June 14, 2026",
+  displayDate: "Saturday, May 30, 2026",
   hero: {
     subtitle: "With joyful hearts, we invite you to celebrate our engagement.",
   },
