@@ -1,6 +1,6 @@
 /**
  * Editable site content — update names, dates, copy, and media here.
- * `eventDateIso` drives the live countdown (UTC recommended).
+ * `eventDateIso` drives the live countdown.
  */
 export const site = {
   meta: {
@@ -12,10 +12,10 @@ export const site = {
     names: ["Yousra", "Abdullah"],
     joiner: "&",
   },
-  /** ISO 8601 in UTC, e.g. 2026-06-14T17:00:00.000Z */
-  eventDateIso: "2026-06-14T17:00:00.000Z",
+  /** Sunday, October 4, 2026 at 7:00 PM in Cairo (UTC+03:00). */
+  eventDateIso: "2026-10-04T19:00:00+03:00",
   /** Shown in the hero (human-friendly) */
-  displayDate: "Saturday, May 30, 2026",
+  displayDate: "Sunday, October 4, 2026",
   hero: {
     subtitle: "With joyful hearts, we invite you to celebrate our engagement.",
   },

@@ -1,4 +1,4 @@
-/** Fired when the guest dismisses the opening overlay — hero atmosphere listens for this. */
+/** Fired when the guest dismisses the opening overlay. */
 export const INVITATION_OPEN_EVENT = "engagement:invitation-open";
 
 export function dispatchInvitationOpen() {

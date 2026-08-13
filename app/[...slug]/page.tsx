@@ -1,5 +1,5 @@
 import { CountdownGate } from "@/components/CountdownGate";
 
-export default function Home() {
+export default function CountdownCatchAllPage() {
   return <CountdownGate />;
 }
