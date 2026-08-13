@@ -4,6 +4,8 @@ import { SectionContainer } from "@/components/SectionContainer";
 import { SectionHeading } from "@/components/SectionHeading";
 
 export function VenueSection() {
+  const note = "note" in site.venue ? site.venue.note : undefined;
+
   return (
     <SectionContainer id="venue" className="bg-[color-mix(in_oklab,var(--color-surface)_40%,transparent)]">
       <Reveal>
@@ -26,9 +28,11 @@ export function VenueSection() {
               </p>
             ))}
           </address>
-          <p className="mx-auto mt-7 max-w-sm font-sans text-[0.8125rem] leading-[1.75] text-[var(--color-ink-muted)] sm:max-w-md sm:text-sm">
-            {site.venue.note}
-          </p>
+          {note ? (
+            <p className="mx-auto mt-7 max-w-sm font-sans text-[0.8125rem] leading-[1.75] text-[var(--color-ink-muted)] sm:max-w-md sm:text-sm">
+              {note}
+            </p>
+          ) : null}
           <div className="mt-9 flex justify-center sm:mt-10">
             <a
               href={site.venue.mapUrl}
