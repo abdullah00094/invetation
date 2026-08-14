@@ -1,16 +1,19 @@
-import { CountdownSection } from "@/components/CountdownSection";
-import { OpeningBalloonsScene } from "@/components/OpeningBalloonsScene";
+"use client";
 
-/**
- * Temporary public gate: the opening scene reveals only the event countdown.
- * Keep this shared between the root and catch-all routes so every public path
- * has the same experience while the full invitation remains unpublished.
- */
+import { useState } from "react";
+import { CountdownSection } from "@/components/CountdownSection";
+import { CurtainOpeningScene } from "@/components/CurtainOpeningScene";
+import { GardenStory } from "@/components/GardenStory";
+
+/** Shared temporary experience used by both the root and catch-all routes. */
 export function CountdownGate() {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
     <>
-      <OpeningBalloonsScene />
-      <main>
+      <CurtainOpeningScene onOpen={() => setIsOpen(true)} />
+      <main aria-hidden={!isOpen} {...(!isOpen ? { inert: true } : {})}>
+        <GardenStory />
         <CountdownSection />
       </main>
     </>
