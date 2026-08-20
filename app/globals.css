@@ -1,32 +1,41 @@
 @import "tailwindcss";
 
 :root {
-  /* Style board: rose #D4A5A5 · gold #D4AF37 · charcoal #333 · ivory #F9F8F3 */
-  --color-paper: #f9f8f3;
-  --color-surface: #f0ede4;
-  --color-ink: #333333;
-  --color-ink-muted: #5a5a5a;
-  --color-rose: #d4a5a5;
-  --color-rose-deep: #b07878;
-  --color-gold: #d4af37;
-  --color-sage: #72816d;
-  --color-leaf: #405744;
+  --color-white: #ffffff;
+  --color-offwhite: #faf9f6;
+  --color-rosegold: #c18b80;
+  --color-terracotta: #aa6041;
+  --color-brown: #825546;
+  --color-blush: #b38170;
+  --color-text-muted: #c18b80;
+
   --container-md: 40rem;
   --container-lg: 72rem;
-  --radius-card: 1.25rem;
-  --radius-panel: 1.75rem;
+  --container-xl: 82.5rem; /* 1320px */
 }
 
 @theme inline {
-  --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-serif: var(--font-cormorant), ui-serif, Georgia, serif;
-  /* Large, soft shadows read more “editorial luxury” than tight drops */
-  --shadow-soft: 0 22px 55px -26px color-mix(in oklab, var(--color-ink) 18%, transparent);
-  --shadow-soft-lg: 0 32px 72px -30px color-mix(in oklab, var(--color-ink) 22%, transparent);
+  --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-serif), ui-serif, Georgia, serif;
+  --font-pinyon: var(--font-pinyon), cursive;
+  --font-arapey: var(--font-arapey), serif;
+  --font-pt-serif: var(--font-pt-serif), serif;
+  
+  --color-white: var(--color-white);
+  --color-offwhite: var(--color-offwhite);
+  --color-rosegold: var(--color-rosegold);
+  --color-terracotta: var(--color-terracotta);
+  --color-brown: var(--color-brown);
+  --color-blush: var(--color-blush);
+  --color-text-muted: var(--color-text-muted);
+
+  --shadow-soft: 0 4px 20px -2px rgba(130, 85, 70, 0.1);
+  --shadow-soft-lg: 0 10px 40px -4px rgba(130, 85, 70, 0.15);
 }
 
 html {
   scroll-behavior: smooth;
+  background-color: var(--color-white);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -36,42 +45,38 @@ html {
 }
 
 body {
-  background: var(--color-paper);
-  color: var(--color-ink);
+  background: var(--color-white);
+  color: var(--color-rosegold);
   font-family: var(--font-sans);
   font-size: 1rem;
   line-height: 1.65;
   letter-spacing: 0.01em;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 ::selection {
-  background: color-mix(in oklab, var(--color-rose) 38%, transparent);
+  background: color-mix(in oklab, var(--color-rosegold) 30%, transparent);
+  color: var(--color-brown);
 }
 
-/* The curtain's center seam opens directly onto the garden path. */
-.curtain-panel { position:absolute; inset-block:0; z-index:10; width:50.35%; background:#9d626a; overflow:hidden; box-shadow:0 0 42px rgba(48,20,25,.42); will-change:transform; }
-.curtain-panel--left { left:0; transform-origin:left center; border-right:1px solid rgba(255,231,215,.2); }
-.curtain-panel--right { right:0; transform-origin:right center; border-left:1px solid rgba(68,25,32,.35); }
-.curtain-folds { position:absolute; inset:0; background:linear-gradient(90deg,rgba(55,16,27,.38),transparent 14%,rgba(255,219,203,.18) 29%,rgba(60,18,28,.3) 47%,rgba(255,224,209,.15) 67%,rgba(53,16,25,.36) 86%,transparent),linear-gradient(180deg,#bd7b83,#955963 62%,#75424d); }
-.curtain-panel--right .curtain-folds { transform:scaleX(-1); }
-.curtain-tassel { position:absolute; top:36%; width:clamp(2rem,4vw,3.5rem); height:clamp(6rem,13vw,10rem); border:clamp(.3rem,.6vw,.5rem) solid #c8a253; border-left:0; border-bottom:0; border-radius:0 80% 0 0; filter:drop-shadow(0 4px 3px rgba(44,24,17,.25)); }
-.curtain-panel--left .curtain-tassel { right:4%; transform:rotate(8deg); }.curtain-panel--right .curtain-tassel { left:4%; transform:scaleX(-1) rotate(8deg); }
-.curtain-valance { position:absolute; z-index:15; inset:0 0 auto; height:clamp(5.5rem,15vh,9rem); background:radial-gradient(ellipse at 10% -30%,#c9868d 0 61%,transparent 63%) 0 0/20% 100%,linear-gradient(#8c505b,#a96772); filter:drop-shadow(0 12px 12px rgba(48,20,25,.3)); }
-.curtain-seam-light { position:absolute; z-index:16; inset-block:0; left:calc(50% - 1px); width:2px; transform-origin:center; background:linear-gradient(transparent 3%,#ffeac1 18%,#fff9e8 75%,transparent); box-shadow:0 0 18px 6px rgba(255,226,169,.7); }
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-pt-serif);
+  font-weight: 400;
+}
 
-.garden-art { position:absolute; inset:-3%; z-index:0; will-change:transform; }
-.garden-sky-glaze { position:absolute; inset:0; z-index:1; background:linear-gradient(180deg,rgba(255,241,208,.08),transparent 58%,rgba(36,55,37,.18)); }
-.garden-path { position:absolute; z-index:5; left:50%; bottom:-3%; width:min(76vw,66rem); height:68%; transform:translateX(-50%); clip-path:polygon(48.5% 0,51.5% 0,100% 100%,0 100%); background:linear-gradient(90deg,rgba(155,130,103,.38),rgba(242,221,185,.2) 50%,rgba(128,107,88,.35)); mix-blend-mode:soft-light; }
-.garden-path-glow { position:absolute; z-index:6; left:50%; bottom:0; width:32vw; height:72%; transform:translateX(-50%); background:linear-gradient(transparent,#fff3c8); filter:blur(28px); }
-.garden-foliage { position:absolute; z-index:8; inset-inline:-5%; pointer-events:none; }
-.garden-foliage::before,.garden-foliage::after { content:""; position:absolute; inset:0; background:radial-gradient(ellipse at 8% 55%,#4a6349 0 16%,transparent 17%),radial-gradient(ellipse at 22% 78%,#708069 0 19%,transparent 20%),radial-gradient(ellipse at 88% 60%,#455d45 0 18%,transparent 19%),radial-gradient(ellipse at 72% 83%,#78846c 0 18%,transparent 19%); }
-.garden-foliage--back { top:30%; height:42%; opacity:.8; filter:blur(1px); }.garden-foliage--mid { top:50%; height:40%; transform:scale(1.2); }.garden-foliage--front { z-index:35; bottom:-8%; height:32%; transform:scale(1.35); filter:brightness(.72); }
-.garden-roses { position:absolute; z-index:12; top:44%; width:35%; height:44%; background:radial-gradient(circle at 16% 38%,#d8a3a3 0 2.5%,transparent 3%),radial-gradient(circle at 30% 58%,#b87880 0 3%,transparent 3.5%),radial-gradient(circle at 55% 23%,#e5b5aa 0 2%,transparent 2.5%),radial-gradient(circle at 70% 68%,#c8878b 0 2.5%,transparent 3%); filter:drop-shadow(0 5px 4px rgba(54,63,42,.2)); }.garden-roses--left{left:0}.garden-roses--right{right:0;transform:scaleX(-1)}
-
-.grooms-wrap { width:clamp(10.5rem,25vw,18rem); height:clamp(16rem,39vw,27rem); transform-origin:center bottom; will-change:transform; filter:drop-shadow(0 12px 8px rgba(45,38,29,.28)); }
-.groom-bob { position:relative; width:100%; height:100%; animation:groom-walk 1.05s ease-in-out infinite; }
-@keyframes groom-walk { 0%,100%{transform:translateY(0) rotate(-.5deg)} 50%{transform:translateY(-4px) rotate(.5deg)} }
-@media (max-width: 420px) { .garden-story{min-height:68rem}.garden-roses{width:48%}.curtain-valance{background-size:33.333% 100%}.grooms-wrap{bottom:14%} }
-@media (prefers-reduced-motion: reduce) { .groom-bob{animation:none}.curtain-panel,.grooms-wrap{will-change:auto} }
+/* Custom scrollbar for an elegant feel */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-offwhite);
+}
+::-webkit-scrollbar-thumb {
+  background: color-mix(in oklab, var(--color-rosegold) 40%, transparent);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-rosegold);
+}

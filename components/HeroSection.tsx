@@ -1,98 +1,51 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
-import { HeroAtmosphere } from "@/components/HeroAtmosphere";
-import { ScrollIndicator } from "@/components/ScrollIndicator";
+import { motion } from "framer-motion";
 import { site } from "@/data/site";
-import { INVITATION_OPEN_EVENT } from "@/lib/site-events";
-import { softTransition } from "@/lib/motion";
-
-const childEase = [0.16, 1, 0.3, 1] as const;
 
 export function HeroSection() {
-  const reduceMotion = useReducedMotion();
-  const headerRef = useRef<HTMLElement>(null);
-  const [revealed, setRevealed] = useState(false);
-
-  useEffect(() => {
-    const onOpen = () => setRevealed(true);
-    window.addEventListener(INVITATION_OPEN_EVENT, onOpen);
-    return () => window.removeEventListener(INVITATION_OPEN_EVENT, onOpen);
-  }, []);
-
-  const namesDelay = reduceMotion ? 0 : 0.1;
-  const subtitleDelay = reduceMotion ? 0 : 0.42;
-  const arrowDelay = reduceMotion ? 0 : 0.78;
-
   return (
-    <header
-      ref={headerRef}
-      className="relative isolate flex min-h-svh flex-col items-center justify-center overflow-hidden px-6 pb-[max(2rem,env(safe-area-inset-bottom))] pt-[max(5.5rem,env(safe-area-inset-top))] text-center sm:px-10"
-    >
-      <HeroAtmosphere scrollRootRef={headerRef} />
-
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 z-[1] bg-[radial-gradient(ellipse_90%_55%_at_50%_0%,color-mix(in_oklab,var(--color-rose)_12%,transparent),transparent_58%),radial-gradient(ellipse_70%_45%_at_90%_80%,color-mix(in_oklab,var(--color-gold)_10%,transparent),transparent)]"
-      />
-
-      <div className="relative z-10 flex max-w-[22rem] flex-col items-center sm:max-w-2xl">
-        {/* Names first */}
-        <motion.h1
-          className="text-balance font-serif text-[clamp(2.45rem,9.5vw,4rem)] font-medium leading-[1.05] tracking-[-0.02em] text-[var(--color-ink)]"
-          initial={false}
-          animate={
-            revealed
-              ? { opacity: 1, y: 0 }
-              : { opacity: 0, y: reduceMotion ? 0 : 14 }
-          }
-          transition={{
-            duration: reduceMotion ? 0.2 : 0.88,
-            ease: childEase,
-            delay: namesDelay,
-          }}
+    <section id="hero" className="relative min-h-[100svh] w-full flex items-center justify-center py-20 bg-[var(--color-white)] overflow-hidden">
+      
+      <div className="max-w-4xl mx-auto w-full px-6 flex flex-col items-center justify-center text-center z-10 relative">
+        
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 0.2 }}
+          className="mb-8 md:mb-12"
         >
-          {site.couple.names[0]}
-          <span className="mx-2.5 inline-block bg-gradient-to-r from-[var(--color-rose)] to-[color-mix(in_oklab,var(--color-rose)_70%,var(--color-gold))] bg-clip-text font-light text-transparent sm:mx-3.5">
-            {site.couple.joiner}
+          <span className="block font-pt-serif font-bold text-[var(--color-rosegold)] uppercase tracking-[0.25em] text-sm md:text-lg mb-8 md:mb-12">
+            we are getting married
           </span>
-          {site.couple.names[1]}
-        </motion.h1>
+          
+          <h1 className="font-pinyon text-7xl md:text-9xl text-[var(--color-rosegold)] leading-tight flex flex-col items-center">
+            <span>{site.couple.first}</span>
+            <span className="text-5xl md:text-7xl my-2">&</span>
+            <span>{site.couple.second}</span>
+          </h1>
+        </motion.div>
 
-        <motion.p
-          className="mx-auto mt-8 max-w-[21rem] font-sans text-[0.9375rem] leading-[1.82] text-[var(--color-ink-muted)] sm:max-w-md sm:text-[1.05rem] sm:leading-[1.75]"
-          initial={false}
-          animate={
-            revealed
-              ? { opacity: 1, y: 0, scale: 1 }
-              : { opacity: 0, y: reduceMotion ? 0 : 12, scale: reduceMotion ? 1 : 0.985 }
-          }
-          transition={{
-            duration: reduceMotion ? 0.2 : 0.82,
-            ease: childEase,
-            delay: subtitleDelay,
-          }}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 0.5 }}
+          className="flex flex-col items-center mt-12 md:mt-20 space-y-6"
         >
-          {site.hero.subtitle}
-        </motion.p>
-      </div>
+          <h2 className="font-pt-serif font-bold text-[var(--color-rosegold)] uppercase tracking-[0.3em] text-base md:text-xl">
+            OUR WEDDING
+          </h2>
+          
+          <p className="font-pt-serif text-[var(--color-rosegold)] text-2xl md:text-3xl tracking-[0.1em]">
+            04 | 10 | 2026
+          </p>
+          
+          <h3 className="font-pt-serif font-bold text-[var(--color-rosegold)] uppercase tracking-[0.2em] text-lg md:text-2xl mt-4">
+            SAVE THE DATE
+          </h3>
+        </motion.div>
 
-      <motion.div
-        className="relative z-10 mt-[clamp(2.75rem,9vh,4.5rem)]"
-        initial={false}
-        animate={
-          revealed
-            ? { opacity: 1, y: 0 }
-            : { opacity: 0, y: reduceMotion ? 0 : 8 }
-        }
-        transition={{
-          ...softTransition,
-          delay: arrowDelay,
-        }}
-      >
-        <ScrollIndicator />
-      </motion.div>
-    </header>
+      </div>
+    </section>
   );
 }

@@ -1,180 +1,128 @@
 "use client";
 
-import type { FormEvent } from "react";
-import { useMemo, useState } from "react";
-import { site } from "@/data/site";
-import type { AttendanceValue } from "@/data/site";
-import { Button } from "@/components/Button";
-import { Reveal } from "@/components/Reveal";
-import { SectionContainer } from "@/components/SectionContainer";
-import { SectionHeading } from "@/components/SectionHeading";
-import { submitRsvpClient, validateRsvp, type RsvpPayload } from "@/lib/rsvp";
-
-const initial: RsvpPayload = {
-  name: "",
-  attendance: "",
-  message: "",
-};
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { site, AttendanceValue } from "@/data/site";
+import { GoldDivider } from "./GoldDivider";
 
 export function RSVPSection() {
-  const [form, setForm] = useState<RsvpPayload>(initial);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [submitting, setSubmitting] = useState(false);
-  const [success, setSuccess] = useState(false);
-
-  const attendanceOptions = useMemo(() => site.rsvp.attendanceOptions, []);
-
-  const onSubmit = async (e: FormEvent) => {
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const nextErrors = validateRsvp(form);
-    setErrors(nextErrors);
-    if (Object.keys(nextErrors).length > 0) return;
-
-    setSubmitting(true);
-    try {
-      // Replace with fetch("/api/rsvp", { method: "POST", body: JSON.stringify(form) })
-      await submitRsvpClient(form);
-      setSuccess(true);
-    } finally {
-      setSubmitting(false);
-    }
+    setStatus("loading");
+    // Simulate network request
+    setTimeout(() => {
+      setStatus("success");
+    }, 1500);
   };
 
   return (
-    <SectionContainer id="rsvp">
-      <Reveal>
-        <SectionHeading
-          eyebrow="RSVP"
-          title={site.rsvp.heading}
-          subtitle="Your reply helps us plan — take your time."
-        />
-      </Reveal>
+    <section id="rsvp" className="py-24 md:py-32 bg-[var(--color-black)] relative overflow-hidden">
+      {/* Background Ornaments */}
+      <div className="absolute left-0 top-0 w-64 h-64 bg-[var(--color-gold-muted)] opacity-5 blur-[120px] pointer-events-none" />
+      <div className="absolute right-0 bottom-0 w-64 h-64 bg-[var(--color-gold-muted)] opacity-5 blur-[120px] pointer-events-none" />
 
-      <Reveal delay={0.06}>
-        {success ? (
-          <div
-            className="mx-auto max-w-xl rounded-[var(--radius-panel)] bg-[var(--color-surface)] px-8 py-14 text-center shadow-soft ring-1 ring-[color-mix(in_oklab,var(--color-rose)_28%,transparent)] sm:py-16"
-            role="status"
-            aria-live="polite"
+      <div className="max-w-[var(--container-md)] mx-auto px-6 relative z-10">
+        
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 1 }}
+          className="text-center mb-12"
+        >
+          <span className="text-[10px] md:text-xs uppercase tracking-[0.25em] text-[var(--color-gold)] block mb-4">
+            JOIN US
+          </span>
+          <h2 className="font-serif text-4xl md:text-5xl text-[var(--color-ivory)] mb-6">
+            {site.rsvp.heading}
+          </h2>
+          <p className="text-[var(--color-beige)] text-lg">
+            {site.rsvp.subtitle}
+          </p>
+        </motion.div>
+
+        {status === "success" ? (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-center p-12 border border-[var(--color-gold)]/30 bg-[var(--color-charcoal)]"
           >
-            <p className="font-serif text-[clamp(1.75rem,5vw,2.25rem)] font-medium tracking-tight text-[var(--color-ink)]">
-              {site.rsvp.successTitle}
-            </p>
-            <p className="mx-auto mt-5 max-w-md font-sans text-[0.9375rem] leading-[1.8] text-[var(--color-ink-muted)]">
-              {site.rsvp.successMessage}
-            </p>
-          </div>
+            <h3 className="font-serif text-3xl text-[var(--color-gold)] mb-4">{site.rsvp.successTitle}</h3>
+            <p className="text-[var(--color-ivory)] leading-relaxed">{site.rsvp.successMessage}</p>
+          </motion.div>
         ) : (
-          <form
-            onSubmit={onSubmit}
-            className="mx-auto max-w-xl space-y-7 rounded-[var(--radius-panel)] bg-[var(--color-paper)]/95 p-8 shadow-soft ring-1 ring-[color-mix(in_oklab,var(--color-ink)_5%,transparent)] sm:space-y-8 sm:p-10"
-            noValidate
+          <motion.form 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 1, delay: 0.2 }}
+            onSubmit={handleSubmit}
+            className="space-y-6 md:space-y-8 bg-[var(--color-charcoal)] p-8 md:p-12 border border-[var(--color-gold-muted)]/20 shadow-[var(--shadow-soft-lg)]"
           >
             <div>
-              <label
-                htmlFor="rsvp-name"
-                className="block font-sans text-[0.8125rem] font-medium uppercase tracking-[0.14em] text-[var(--color-ink-muted)]"
-              >
-                Your name
+              <label htmlFor="name" className="block text-xs uppercase tracking-[0.15em] text-[var(--color-gold-muted)] mb-3">
+                Full Name
               </label>
-              <input
-                id="rsvp-name"
-                name="name"
-                autoComplete="name"
-                value={form.name}
-                onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                className="mt-2.5 w-full rounded-2xl border-0 bg-[var(--color-surface)] px-4 py-3.5 font-sans text-base text-[var(--color-ink)] outline-none ring-1 ring-[color-mix(in_oklab,var(--color-ink)_6%,transparent)] transition-shadow focus:ring-2 focus:ring-[color-mix(in_oklab,var(--color-rose)_45%,transparent)]"
-                aria-invalid={errors.name ? true : undefined}
-                aria-describedby={errors.name ? "rsvp-name-error" : undefined}
+              <input 
+                id="name"
+                required
+                type="text" 
+                className="w-full bg-transparent border-b border-[var(--color-gold-muted)]/30 py-3 text-[var(--color-ivory)] focus:outline-none focus:border-[var(--color-gold)] transition-colors placeholder:text-[var(--color-text-muted)]"
+                placeholder="Jane & John Doe"
               />
-              {errors.name ? (
-                <p id="rsvp-name-error" className="mt-2 text-sm text-[var(--color-rose-deep)]">
-                  {errors.name}
-                </p>
-              ) : null}
             </div>
-
-            <fieldset>
-              <legend className="block font-sans text-[0.8125rem] font-medium uppercase tracking-[0.14em] text-[var(--color-ink-muted)]">
-                Will you join us?
-              </legend>
-              <div className="mt-3.5 space-y-2.5">
-                {attendanceOptions.map((opt) => (
-                  <label
-                    key={opt.value}
-                    className="flex min-h-[3.25rem] cursor-pointer items-center gap-3 rounded-2xl bg-[var(--color-surface)] px-4 py-3 ring-1 ring-[color-mix(in_oklab,var(--color-ink)_5%,transparent)] transition-[background-color,ring-color] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[color-mix(in_oklab,var(--color-rose)_40%,transparent)]"
-                  >
-                    <input
-                      type="radio"
-                      name="attendance"
-                      value={opt.value}
-                      checked={form.attendance === opt.value}
-                      onChange={() =>
-                        setForm((f) => ({
-                          ...f,
-                          attendance: opt.value as AttendanceValue,
-                        }))
-                      }
-                      className="size-4 accent-[var(--color-rose-deep)]"
-                    />
-                    <span className="font-sans text-[0.9375rem] text-[var(--color-ink)]">
+            
+            <div>
+              <label htmlFor="attendance" className="block text-xs uppercase tracking-[0.15em] text-[var(--color-gold-muted)] mb-3">
+                Attendance
+              </label>
+              <div className="space-y-3">
+                {site.rsvp.attendanceOptions.map((opt) => (
+                  <label key={opt.value} className="flex items-center gap-4 cursor-pointer group">
+                    <div className="relative flex items-center justify-center">
+                      <input 
+                        type="radio" 
+                        name="attendance" 
+                        value={opt.value} 
+                        required
+                        className="peer appearance-none w-5 h-5 border border-[var(--color-gold-muted)] rounded-full checked:border-[var(--color-gold)] transition-colors cursor-pointer"
+                      />
+                      <div className="absolute w-2.5 h-2.5 bg-[var(--color-gold)] rounded-full opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" />
+                    </div>
+                    <span className="text-[var(--color-beige)] group-hover:text-[var(--color-ivory)] transition-colors">
                       {opt.label}
                     </span>
                   </label>
                 ))}
               </div>
-              {errors.attendance ? (
-                <p className="mt-2 text-sm text-[var(--color-rose-deep)]">
-                  {errors.attendance}
-                </p>
-              ) : null}
-            </fieldset>
+            </div>
 
             <div>
-              <label
-                htmlFor="rsvp-message"
-                className="block font-sans text-[0.8125rem] font-medium uppercase tracking-[0.14em] text-[var(--color-ink-muted)]"
-              >
-                A note for us{" "}
-                <span className="font-normal normal-case tracking-normal text-[var(--color-ink-muted)]">
-                  (optional)
-                </span>
+              <label htmlFor="dietary" className="block text-xs uppercase tracking-[0.15em] text-[var(--color-gold-muted)] mb-3">
+                Dietary Requirements / Note (Optional)
               </label>
-              <textarea
-                id="rsvp-message"
-                name="message"
-                rows={4}
-                value={form.message}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, message: e.target.value }))
-                }
-                className="mt-2.5 w-full resize-y rounded-2xl border-0 bg-[var(--color-surface)] px-4 py-3.5 font-sans text-base text-[var(--color-ink)] outline-none ring-1 ring-[color-mix(in_oklab,var(--color-ink)_6%,transparent)] transition-shadow focus:ring-2 focus:ring-[color-mix(in_oklab,var(--color-rose)_45%,transparent)]"
-                aria-invalid={errors.message ? true : undefined}
-                aria-describedby={errors.message ? "rsvp-message-error" : undefined}
+              <textarea 
+                id="dietary"
+                rows={2}
+                className="w-full bg-transparent border-b border-[var(--color-gold-muted)]/30 py-3 text-[var(--color-ivory)] focus:outline-none focus:border-[var(--color-gold)] transition-colors resize-none placeholder:text-[var(--color-text-muted)]"
+                placeholder="Any special requests..."
               />
-              {errors.message ? (
-                <p
-                  id="rsvp-message-error"
-                  className="mt-2 text-sm text-[var(--color-rose-deep)]"
-                >
-                  {errors.message}
-                </p>
-              ) : null}
             </div>
 
-            <div className="pt-1">
-              <Button
+            <div className="pt-6">
+              <button
                 type="submit"
-                variant="primary"
-                className="w-full"
-                disabled={submitting}
+                disabled={status === "loading"}
+                className="w-full py-4 bg-[var(--color-gold)] text-[var(--color-black)] text-[11px] uppercase tracking-[0.2em] font-medium hover:bg-[var(--color-gold-highlight)] transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
               >
-                {submitting ? "Sending…" : "Send response"}
-              </Button>
+                {status === "loading" ? "Sending..." : "Send Reply"}
+              </button>
             </div>
-          </form>
+          </motion.form>
         )}
-      </Reveal>
-    </SectionContainer>
+      </div>
+    </section>
   );
 }

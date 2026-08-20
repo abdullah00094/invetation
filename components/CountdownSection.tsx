@@ -1,120 +1,83 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { site } from "@/data/site";
-import { Reveal } from "@/components/Reveal";
-import { SectionContainer } from "@/components/SectionContainer";
-import { SectionHeading } from "@/components/SectionHeading";
-import { softTransition } from "@/lib/motion";
 
-type Remaining = {
+interface TimeLeft {
   days: number;
   hours: number;
   minutes: number;
   seconds: number;
-  done: boolean;
-};
-
-function getRemaining(target: number, now: number): Remaining {
-  const diff = Math.max(0, target - now);
-  if (diff === 0) {
-    return { days: 0, hours: 0, minutes: 0, seconds: 0, done: true };
-  }
-  const days = Math.floor(diff / 86400000);
-  const hours = Math.floor((diff % 86400000) / 3600000);
-  const minutes = Math.floor((diff % 3600000) / 60000);
-  const seconds = Math.floor((diff % 60000) / 1000);
-  return { days, hours, minutes, seconds, done: false };
 }
 
-const labels = ["Days", "Hours", "Minutes", "Seconds"] as const;
+function calculateTimeLeft(targetIso: string): TimeLeft {
+  const diff = new Date(targetIso).getTime() - new Date().getTime();
+  if (diff <= 0) return { days: 0, hours: 0, minutes: 0, seconds: 0 };
 
-const PLACEHOLDER: Remaining = {
-  days: 0,
-  hours: 0,
-  minutes: 0,
-  seconds: 0,
-  done: false,
-};
+  return {
+    days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+    hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
+    minutes: Math.floor((diff / 1000 / 60) % 60),
+    seconds: Math.floor((diff / 1000) % 60),
+  };
+}
 
 export function CountdownSection() {
-  const target = useMemo(
-    () => new Date(site.eventDateIso).getTime(),
-    [],
-  );
-  const reduceMotion = useReducedMotion();
-  /** Avoid SSR/client time mismatch (React #418) — use the same initial placeholder. */
-  const [remaining, setRemaining] = useState<Remaining>(PLACEHOLDER);
+  const [timeLeft, setTimeLeft] = useState<TimeLeft>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const tick = () => setRemaining(getRemaining(target, Date.now()));
-    const initialTick = window.setTimeout(tick, 0);
-    const id = window.setInterval(tick, 1000);
-    return () => {
-      window.clearTimeout(initialTick);
-      window.clearInterval(id);
-    };
-  }, [target]);
+    setMounted(true);
+    setTimeLeft(calculateTimeLeft(site.eventDateIso));
 
-  const values = [
-    remaining.days,
-    remaining.hours,
-    remaining.minutes,
-    remaining.seconds,
-  ] as const;
+    const timer = setInterval(() => {
+      setTimeLeft(calculateTimeLeft(site.eventDateIso));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const pad = (num: number) => String(num).padStart(2, "0");
+
+  if (!mounted) return null;
 
   return (
-    <SectionContainer
-      id="countdown"
-      className="relative isolate flex min-h-svh items-center overflow-hidden bg-[radial-gradient(ellipse_75%_55%_at_4%_18%,color-mix(in_oklab,var(--color-rose)_17%,transparent),transparent_68%),radial-gradient(ellipse_65%_50%_at_96%_82%,color-mix(in_oklab,var(--color-gold)_13%,transparent),transparent_70%)] pb-[max(4rem,env(safe-area-inset-bottom))] pt-[max(4rem,env(safe-area-inset-top))] sm:py-24 [&>div]:relative [&>div]:z-10 [&>div]:max-w-[44rem]"
-    >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-[8%] top-1/2 -z-10 h-px bg-gradient-to-r from-transparent via-[color-mix(in_oklab,var(--color-gold)_30%,transparent)] to-transparent"
-      />
+    <section className="py-20 md:py-32 bg-[var(--color-white)] flex flex-col justify-center items-center overflow-hidden">
+      <motion.div 
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 1, ease: "easeOut" }}
+        className="w-full max-w-4xl px-6 flex flex-col items-center"
+      >
+        <h2 className="font-pt-serif font-bold text-[var(--color-brown)] uppercase tracking-[0.25em] text-lg md:text-2xl mb-16 text-center">
+          UNTILL OUR DAY
+        </h2>
 
-      <div className="mx-auto w-full">
-        <Reveal>
-          <SectionHeading
-            eyebrow="Save the date"
-            title="Counting the moments"
-            subtitle="Until Sunday, October 4, 2026 at 7:00 PM — when we celebrate together."
-          />
-        </Reveal>
+        <div className="flex flex-row justify-center items-center w-full gap-x-4 md:gap-x-12">
+          
+          <TimeBlock value={pad(timeLeft.days)} label="DAYS" />
+          
+          <TimeBlock value={pad(timeLeft.hours)} label="HOURS" />
+          
+          <TimeBlock value={pad(timeLeft.minutes)} label="MINUTES" />
+          
+          <TimeBlock value={pad(timeLeft.seconds)} label="SECONDS" />
+        </div>
+      </motion.div>
+    </section>
+  );
+}
 
-        <Reveal delay={0.06}>
-          {remaining.done ? (
-            <p className="mx-auto max-w-md text-center font-serif text-xl font-medium leading-snug text-[var(--color-ink)] sm:text-2xl">
-              The day has arrived — we are celebrating with full hearts.
-            </p>
-          ) : (
-            <div
-              className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4"
-              aria-label="Time remaining until Sunday, October 4, 2026 at 7:00 PM"
-              role="timer"
-            >
-              {values.map((value, i) => (
-                <motion.div
-                  key={labels[i]}
-                  className="flex min-h-[7rem] flex-col justify-center rounded-[var(--radius-card)] bg-[color-mix(in_oklab,var(--color-surface)_88%,var(--color-paper))] px-2 py-5 text-center shadow-soft ring-1 ring-[color-mix(in_oklab,var(--color-rose-deep)_12%,transparent)] sm:min-h-[8.25rem] sm:px-3 sm:py-6"
-                  initial={reduceMotion ? false : { opacity: 0, y: 8 }}
-                  whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-8%" }}
-                  transition={{ ...softTransition, delay: 0.04 * i }}
-                >
-                  <p className="font-serif text-[clamp(2.25rem,8vw,3.5rem)] tabular-nums leading-none tracking-[-0.025em] text-[var(--color-ink)]">
-                    {String(value).padStart(2, "0")}
-                  </p>
-                  <p className="mt-3 font-sans text-[0.6rem] font-medium uppercase tracking-[0.26em] text-[var(--color-ink-muted)]">
-                    {labels[i]}
-                  </p>
-                </motion.div>
-              ))}
-            </div>
-          )}
-        </Reveal>
-      </div>
-    </SectionContainer>
+function TimeBlock({ value, label }: { value: string; label: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center">
+      <span className="font-sans font-medium text-4xl md:text-6xl text-[var(--color-rosegold)] tabular-nums tracking-widest drop-shadow-sm mb-4">
+        {value}
+      </span>
+      <span className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-[var(--color-terracotta)] font-bold">
+        {label}
+      </span>
+    </div>
   );
 }

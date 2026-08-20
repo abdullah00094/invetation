@@ -10,19 +10,24 @@ export const site = {
   },
   couple: {
     names: ["Yousra", "Abdullah"],
+    first: "Yousra",
+    second: "Abdullah",
     joiner: "&",
   },
   /** Sunday, October 4, 2026 at 7:00 PM in Cairo (UTC+03:00). */
   eventDateIso: "2026-10-04T19:00:00+03:00",
   /** Shown in the hero (human-friendly) */
   displayDate: "Sunday, October 4, 2026",
+  displayTime: "7:00 PM",
   hero: {
-    subtitle: "With joyful hearts, we invite you to celebrate our engagement.",
+    subtitle: "With joyful hearts, we invite you to celebrate the beginning of our forever.",
   },
   /** Full-screen opening — CTA copy */
   opening: {
-    tapEn: "Tap to Open",
-    hint: "A gentle lift before your story begins.",
+    label: "YOU ARE INVITED",
+    event: "Engagement Celebration",
+    date: "04 · 10 · 2026",
+    button: "OPEN INVITATION",
   },
   invitation: {
     heading: "Together, with you",
@@ -31,6 +36,27 @@ export const site = {
       "Your presence has shaped our story in ways we carry every day. Sharing this moment with you would make it complete.",
     ],
   },
+  story: {
+    heading: "Toward a Beautiful Beginning",
+    paragraphs: [
+      "Every great journey begins with a single step, and ours began with a simple hello. Over time, that hello grew into a profound connection, filled with shared dreams and countless moments of joy.",
+      "As we stand on the threshold of our future, we look back with immense gratitude for the path that led us here, and look forward to the beautiful life we are building together."
+    ],
+  },
+  faq: [
+    {
+      question: "When should I arrive?",
+      answer: "Please aim to arrive by 6:30 PM to get settled before the celebration officially begins."
+    },
+    {
+      question: "Where is the venue?",
+      answer: "The engagement will be held at our beloved venue. Please refer to the Event Details section for the exact location."
+    },
+    {
+      question: "Is there a dress code?",
+      answer: "We kindly request formal evening attire to match the elegance of our celebration."
+    },
+  ],
   timeline: [
     {
       title: "Ceremony",
@@ -74,7 +100,8 @@ export const site = {
       "https://maps.app.goo.gl/amvDZSJoT78TN8Ef8",
   },
   rsvp: {
-    heading: "Kindly respond",
+    heading: "Will You Celebrate With Us?",
+    subtitle: "We would be delighted to have you with us.",
     attendanceOptions: [
       { value: "yes", label: "Joyfully accepts" },
       { value: "no", label: "Regretfully declines" },
@@ -85,9 +112,9 @@ export const site = {
       "Your response has been received. We are so grateful — and we cannot wait to celebrate with you.",
   },
   footer: {
-    line: "With love,",
+    date: "04 · 10 · 2026",
     names: "Yousra & Abdullah",
-    closing: "We will cherish this day because you are part of it.",
+    closing: "Thank you for being part of our beginning.",
   },
 } as const;
 

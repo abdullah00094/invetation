@@ -1,20 +1,35 @@
 "use client";
 
 import { useState } from "react";
-import { CountdownSection } from "@/components/CountdownSection";
-import { CurtainOpeningScene } from "@/components/CurtainOpeningScene";
-import { GardenStory } from "@/components/GardenStory";
+import { AnimatePresence } from "framer-motion";
+import { InvitationGate } from "./InvitationGate";
+import { HeroSection } from "./HeroSection";
+import { CountdownSection } from "./CountdownSection";
+import { EventDetails } from "./EventDetails";
 
-/** Shared temporary experience used by both the root and catch-all routes. */
+/** 
+ * Serves as the main page coordinator, managing the opening sequence
+ * and rendering the full invitation structure once opened.
+ */
 export function CountdownGate() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
-      <CurtainOpeningScene onOpen={() => setIsOpen(true)} />
+      <AnimatePresence>
+        {!isOpen && (
+          <InvitationGate onOpen={() => setIsOpen(true)} />
+        )}
+      </AnimatePresence>
+      
       <main aria-hidden={!isOpen} {...(!isOpen ? { inert: true } : {})}>
-        <GardenStory />
-        <CountdownSection />
+        {isOpen && (
+          <>
+            <HeroSection />
+            <CountdownSection />
+            <EventDetails />
+          </>
+        )}
       </main>
     </>
   );

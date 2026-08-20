@@ -122,7 +122,7 @@ export function InvitationAmbientAudioProvider({ children }: { children: ReactNo
         <button
           type="button"
           onClick={toggleMute}
-          className="fixed right-4 top-[max(0.75rem,env(safe-area-inset-top))] z-[90] flex size-11 items-center justify-center rounded-full border border-[color-mix(in_oklab,var(--color-ink)_10%,transparent)] bg-[color-mix(in_oklab,var(--color-paper)_92%,transparent)] text-lg shadow-soft backdrop-blur-sm transition-[transform,box-shadow] hover:shadow-soft-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-ink)] active:scale-[0.97] sm:right-5 sm:top-[max(1rem,env(safe-area-inset-top))]"
+          className="fixed right-4 top-[max(0.75rem,env(safe-area-inset-top))] z-[90] flex size-11 items-center justify-center rounded-full border border-[var(--color-rosegold)]/30 bg-[var(--color-white)]/80 text-[var(--color-terracotta)] text-lg shadow-[var(--shadow-soft)] backdrop-blur-sm transition-[transform,box-shadow,border-color] hover:border-[var(--color-rosegold)] hover:shadow-[var(--shadow-soft-lg)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-rosegold)] active:scale-[0.97] sm:right-5 sm:top-[max(1rem,env(safe-area-inset-top))]"
           aria-label={userMuted ? "Unmute ambient audio" : "Mute ambient audio"}
           aria-pressed={userMuted}
         >
