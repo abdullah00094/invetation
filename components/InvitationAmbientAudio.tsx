@@ -11,7 +11,7 @@ import {
 } from "react";
 
 /** Place your track at: `public/sound.mp3` (served as `/sound.mp3`) */
-const AMBIENT_SRC = "/sound.mp3";
+const AMBIENT_SRC = "/invetation.mp3";
 
 /** Fade-in length (ms) — tweak for softer / faster build */
 const FADE_MS = 1800;
