@@ -4,9 +4,9 @@
  */
 export const site = {
   meta: {
-    title: "Yousra & Abdullah — Engagement",
+    title: "Yousra & Abdullah — Katb Al-Kitab ceremony ",
     description:
-      "You are warmly invited to celebrate our engagement with an evening of love, laughter, and togetherness.",
+      "You are warmly invited to celebrate our Katb Al-Kitab ceremony  with an evening of love, laughter, and togetherness.",
   },
   couple: {
     names: ["Yousra", "Abdullah"],
@@ -17,11 +17,11 @@ export const site = {
   /** Shown in the hero (human-friendly) */
   displayDate: "Sunday, October 4, 2026",
   hero: {
-    subtitle: "With joyful hearts, we invite you to celebrate our engagement.",
+    subtitle: "With joyful hearts, we invite you to celebrate our Katb Al-Kitab ceremony .",
   },
   /** Full-screen opening — CTA copy */
   opening: {
-    tapEn: "Tap to Open",
+    tapEn: "Open Invitation",
     hint: "A gentle lift before your story begins.",
   },
   invitation: {
@@ -55,7 +55,7 @@ export const site = {
     },
     {
       src: "https://images.unsplash.com/photo-1522673606160-de0bda48a286?w=800&q=80",
-      alt: "Hands with engagement ring",
+      alt: "Hands with Katb Al-Kitab ceremony  ring",
     },
     {
       src: "https://images.unsplash.com/photo-1529636796338-32bd17d9e848?w=800&q=80",
@@ -67,11 +67,10 @@ export const site = {
     },
   ],
   venue: {
-    name: "fe 2abl 3abdallah",
-    addressLines: ["wara el re2aten kda :D"],
-    note: "ew3a 7ad yet2a5r :') .",
-    mapUrl:
-      "https://maps.app.goo.gl/amvDZSJoT78TN8Ef8",
+    name: "El Mwasah Wedding Venue & Elderly Care",
+    addressLines: ["El Mwasah Wedding Venue & Elderly Care"],
+    note: "",
+    mapUrl: "https://maps.app.goo.gl/2gqKsSTddCCDBzNB8",
   },
   rsvp: {
     heading: "Kindly respond",
