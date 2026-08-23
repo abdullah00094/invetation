@@ -2,40 +2,77 @@
 
 import { FormEvent, useState } from "react";
 import { Reveal } from "@/components/Reveal";
-import { saveGuestbookWish } from "@/lib/guestbook";
+import {
+  type AttendanceResponse,
+  saveGuestbookWish,
+} from "@/lib/guestbook";
 
-type Errors = { name?: string; wish?: string };
+type Errors = {
+  name?: string;
+  attendance?: string;
+  wish?: string;
+  submit?: string;
+};
+
+const attendanceOptions: ReadonlyArray<{
+  value: AttendanceResponse;
+  label: string;
+}> = [
+  { value: "yes", label: "Definitely attending" },
+  { value: "maybe", label: "Maybe" },
+  { value: "no", label: "Unable to attend" },
+];
 
 export function GuestbookSection() {
   const [errors, setErrors] = useState<Errors>({});
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  function validate(name: string, wish: string) {
+  function validate(
+    name: string,
+    attendance: string,
+    wish: string,
+  ) {
     const next: Errors = {};
     if (name.length < 2) next.name = "Please enter at least 2 characters.";
     else if (name.length > 80) next.name = "Please keep your name under 80 characters.";
+    if (!attendanceOptions.some((option) => option.value === attendance)) {
+      next.attendance = "Please let us know if you can join us.";
+    }
     if (wish.length < 3) next.wish = "Please leave a wish of at least 3 characters.";
     else if (wish.length > 500) next.wish = "Please keep your wish under 500 characters.";
     return next;
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (submitting) return;
     const form = event.currentTarget;
     const formData = new FormData(form);
     const name = String(formData.get("name") ?? "").trim();
+    const attendance = String(formData.get("attendance") ?? "");
     const wish = String(formData.get("wish") ?? "").trim();
-    const nextErrors = validate(name, wish);
+    const nextErrors = validate(name, attendance, wish);
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length) return;
 
     setSubmitting(true);
-    saveGuestbookWish({ name, wish });
-    setSubmitted(true);
-    setSubmitting(false);
-    form.reset();
+
+    try {
+      await saveGuestbookWish({
+        name,
+        wish,
+        attendance: attendance as AttendanceResponse,
+      });
+      setSubmitted(true);
+      form.reset();
+    } catch {
+      setErrors({
+        submit: "We couldn't save your wish. Please check your connection and try again.",
+      });
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -66,6 +103,30 @@ export function GuestbookSection() {
                 <input id="guest-name" name="name" type="text" autoComplete="name" minLength={2} maxLength={80} required aria-invalid={Boolean(errors.name)} aria-describedby={errors.name ? "guest-name-error" : undefined} />
                 {errors.name && <p className="field-error" id="guest-name-error">{errors.name}</p>}
               </div>
+              <fieldset
+                className="guestbook-attendance"
+                aria-describedby={errors.attendance ? "guest-attendance-error" : undefined}
+              >
+                <legend>Will you be joining us?</legend>
+                <div className="guestbook-attendance-options">
+                  {attendanceOptions.map((option) => (
+                    <label key={option.value} className="guestbook-attendance-option">
+                      <input
+                        type="radio"
+                        name="attendance"
+                        value={option.value}
+                        required
+                      />
+                      <span>{option.label}</span>
+                    </label>
+                  ))}
+                </div>
+                {errors.attendance && (
+                  <p className="field-error" id="guest-attendance-error">
+                    {errors.attendance}
+                  </p>
+                )}
+              </fieldset>
               <div className="guestbook-field">
                 <label htmlFor="guest-wish">Leave us a wish</label>
                 <textarea id="guest-wish" name="wish" rows={5} minLength={3} maxLength={500} required aria-invalid={Boolean(errors.wish)} aria-describedby={errors.wish ? "guest-wish-error" : undefined} />
@@ -74,6 +135,11 @@ export function GuestbookSection() {
               <button className="story-button" type="submit" disabled={submitting}>
                 {submitting ? "Sending…" : "Send your wish"}
               </button>
+              {errors.submit && (
+                <p className="field-error" role="alert">
+                  {errors.submit}
+                </p>
+              )}
             </form>
           )}
         </Reveal>
