@@ -4,12 +4,17 @@
  */
 export const site = {
   meta: {
-    title: "Yousra & Abdullah — Katb Al-Kitab ceremony ",
+    title: "Abdullah & Yousra — Katb Al-Kitab Ceremony",
     description:
-      "You are warmly invited to celebrate our Katb Al-Kitab ceremony  with an evening of love, laughter, and togetherness.",
+      "You are warmly invited to celebrate our Katb Al-Kitab ceremony with an evening of love, laughter, and togetherness.",
+    socialTitle: "Abdullah & Yousra",
+    occasion: "Katb Al-Kitab Ceremony",
+    socialDate: "Sunday, October 4, 2026 · 7:00 PM",
+    imageAlt:
+      "Invitation for Abdullah and Yousra's Katb Al-Kitab ceremony on October 4, 2026",
   },
   couple: {
-    names: ["Yousra", "Abdullah"],
+    names: ["Abdullah", "Yousra"],
     joiner: "&",
   },
   /** Sunday, October 4, 2026 at 7:00 PM in Cairo (UTC+03:00). */
@@ -85,7 +90,7 @@ export const site = {
   },
   footer: {
     line: "With love,",
-    names: "Yousra & Abdullah",
+    names: "Abdullah & Yousra",
     closing: "We will cherish this day because you are part of it.",
   },
 } as const;

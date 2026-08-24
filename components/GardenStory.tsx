@@ -23,7 +23,7 @@ export function GardenStory() {
         <div className="garden-petal garden-petal--two" aria-hidden />
         <div className="garden-heading">
           <motion.p initial={reduceMotion ? false : { opacity: 0, y: 8 }} whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }} viewport={{ once: true }}>A walk toward our day</motion.p>
-          <h2>Yousra <span>&amp;</span> Abdullah</h2><small>Scroll gently</small>
+          <h2>Abdullah <span>&amp;</span> Yousra</h2><small>Scroll gently</small>
         </div>
         <motion.div className="couple-wrap absolute bottom-[10%] left-1/2 z-30" style={reduceMotion ? { x: "-50%", y: "2svh", scale: .78 } : { x, y, scale }}>
           <div className="couple-walk"><Image src="/man-woman-walking.png" alt="A man and woman walking hand in hand through the garden" fill priority sizes="(max-width: 640px) 52vw, 25vw" className="object-contain" /></div>

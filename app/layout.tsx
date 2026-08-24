@@ -1,38 +1,79 @@
 import type { Metadata, Viewport } from "next";
-import { Arapey, Pinyon_Script, PT_Serif } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { Providers } from "./providers";
 import { site } from "@/data/site";
 
-const ptSerif = PT_Serif({
+function getMetadataBase() {
+  const configuredUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  const vercelUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  const rawUrl = configuredUrl ?? (vercelUrl ? `https://${vercelUrl}` : undefined);
+
+  if (!rawUrl) return new URL("http://localhost:3000");
+
+  try {
+    return new URL(rawUrl.startsWith("http") ? rawUrl : `https://${rawUrl}`);
+  } catch {
+    return new URL("http://localhost:3000");
+  }
+}
+
+const metadataBase = getMetadataBase();
+const hasProductionUrl = Boolean(
+  process.env.NEXT_PUBLIC_SITE_URL ?? process.env.VERCEL_PROJECT_PRODUCTION_URL,
+);
+
+const ptSerif = localFont({
   variable: "--font-pt-serif",
-  subsets: ["latin"],
-  weight: ["400", "700"],
+  src: [
+    { path: "./fonts/pt-serif-regular.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/pt-serif-bold.woff2", weight: "700", style: "normal" },
+  ],
   display: "swap",
 });
 
-const arapey = Arapey({
+const arapey = localFont({
   variable: "--font-arapey",
-  subsets: ["latin"],
-  weight: "400",
-  style: ["normal", "italic"],
+  src: [
+    { path: "./fonts/arapey-regular.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/arapey-italic.woff2", weight: "400", style: "italic" },
+  ],
   display: "swap",
 });
 
-const pinyon = Pinyon_Script({
+const pinyon = localFont({
   variable: "--font-pinyon",
-  subsets: ["latin"],
-  weight: "400",
+  src: "./fonts/pinyon-script.woff2",
   display: "swap",
 });
 
 export const metadata: Metadata = {
+  metadataBase,
   title: site.meta.title,
   description: site.meta.description,
+  ...(hasProductionUrl
+    ? { alternates: { canonical: metadataBase } }
+    : {}),
+  applicationName: `${site.meta.socialTitle} Invitation`,
   openGraph: {
-    title: site.meta.title,
+    title: site.meta.socialTitle,
     description: site.meta.description,
     type: "website",
+    siteName: `${site.meta.socialTitle} Invitation`,
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: site.meta.imageAlt,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: site.meta.socialTitle,
+    description: site.meta.description,
+    images: [{ url: "/opengraph-image", alt: site.meta.imageAlt }],
   },
 };
 

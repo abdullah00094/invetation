@@ -47,12 +47,12 @@ export function CurtainOpeningScene({ onOpen }: { onOpen: () => void }) {
             <div className="invitation-frame" aria-hidden />
             <div className="cover-copy">
               <p className="cover-kicker">Together with joy</p>
-              <h1 id="cover-title" className="cover-names">Yousra <span>&amp;</span> Abdullah</h1>
+              <h1 id="cover-title" className="cover-names">Abdullah <span>&amp;</span> Yousra</h1>
               <div className="cover-flourish" aria-hidden><span>♡</span></div>
               <p className="cover-event">Katb Al-Kitab ceremony </p>
               <p className="cover-date">Sunday · October 4 · 2026</p>
               <p className="cover-time">7:00 PM</p>
-              <button type="button" onClick={openInvitation} className="seal-button" aria-label="Open Yousra and Abdullah's Katb Al-Kitab ceremony invitation">
+              <button type="button" onClick={openInvitation} className="seal-button" aria-label="Open Abdullah and Yousra's Katb Al-Kitab ceremony invitation">
                 <span aria-hidden>YA</span><strong>{site.opening.tapEn}</strong>
               </button>
             </div>
