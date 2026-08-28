@@ -1,5 +1,7 @@
 import { CountdownGate } from "@/components/CountdownGate";
+import NotFound from "./not-found";
 
 export default function Home() {
-  return <CountdownGate />;
+  return <NotFound/>
+  // return <CountdownGate />;
 }
