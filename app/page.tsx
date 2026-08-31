@@ -3,5 +3,5 @@ import NotFound from "./not-found";
 
 export default function Home() {
   return <NotFound/>
-  // return <CountdownGate />;
+  return <CountdownGate />;
 }

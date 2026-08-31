@@ -23,12 +23,12 @@ export default function NotFound() {
         <p className="not-found-code" aria-label="Error 404">404</p>
         <div className="not-found-rule" aria-hidden="true"><span>✦</span></div>
         <h1 id="not-found-title">This page wandered away</h1>
-        {/* <p className="not-found-copy">
+        <p className="not-found-copy">
           The invitation is waiting for you at our home page.
         </p>
         <Link className="story-button not-found-link" href="/">
           Return to the invitation
-        </Link> */}
+        </Link>
       </section>
       <div className="not-found-seal" aria-hidden="true"><span>YA</span></div>
     </main>
