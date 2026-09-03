@@ -1,4 +1,4 @@
-import { createHmac, randomUUID } from "node:crypto";
+import { randomUUID } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase-admin";
 
@@ -11,7 +11,7 @@ function getClientIp(request: NextRequest) {
   const forwarded = request.headers.get("x-forwarded-for");
   return forwarded?.split(",")[0]?.trim()
     || request.headers.get("x-real-ip")?.trim()
-    || "unknown";
+    || "";
 }
 
 function getDeviceType(userAgent: string) {
@@ -21,29 +21,18 @@ function getDeviceType(userAgent: string) {
 }
 
 export async function POST(request: NextRequest) {
-  const hashSecret = process.env.VISITOR_HASH_SECRET;
-
-  if (!hashSecret) {
-    return NextResponse.json(
-      { error: "Visitor tracking is not configured." },
-      { status: 503 },
-    );
-  }
-
   const existingId = request.cookies.get(VISITOR_COOKIE)?.value;
   const visitorId = existingId && UUID_PATTERN.test(existingId)
     ? existingId
     : randomUUID();
   const userAgent = request.headers.get("user-agent")?.slice(0, 500) || "unknown";
-  const ipHash = createHmac("sha256", hashSecret)
-    .update(getClientIp(request))
-    .digest("hex");
+  const ipAddress = getClientIp(request);
 
   try {
     const supabase = createSupabaseAdmin();
     const { error } = await supabase.rpc("record_site_visit", {
       p_visitor_id: visitorId,
-      p_ip_hash: ipHash,
+      p_ip_address: ipAddress,
       p_user_agent: userAgent,
       p_device_type: getDeviceType(userAgent),
     });
