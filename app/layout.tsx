@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { Providers } from "./providers";
 import { site } from "@/data/site";
+import { VisitTracker } from "@/components/VisitTracker";
 
 function getMetadataBase() {
   const configuredUrl = process.env.NEXT_PUBLIC_SITE_URL;
@@ -93,6 +94,7 @@ export default function RootLayout({
       <body
         className={`${ptSerif.variable} ${arapey.variable} ${pinyon.variable} min-h-[100svh] overflow-x-hidden antialiased`}
       >
+        <VisitTracker />
         <Providers>{children}</Providers>
       </body>
     </html>
