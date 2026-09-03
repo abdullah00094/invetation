@@ -6,6 +6,7 @@ import { useInvitationAmbientAudio } from "@/components/InvitationAmbientAudio";
 import { site } from "@/data/site";
 import { unlockCelebrationAudio } from "@/lib/celebration-audio";
 import { dispatchInvitationOpen } from "@/lib/site-events";
+import { trackInvitationOpen } from "@/components/VisitTracker";
 
 export function CurtainOpeningScene({ onOpen }: { onOpen: () => void }) {
   const { startAfterOpeningClick } = useInvitationAmbientAudio();
@@ -28,6 +29,7 @@ export function CurtainOpeningScene({ onOpen }: { onOpen: () => void }) {
     startAfterOpeningClick();
     unlockCelebrationAudio();
     dispatchInvitationOpen();
+    trackInvitationOpen();
     setOpening(true);
     timer.current = window.setTimeout(() => {
       onOpen();
