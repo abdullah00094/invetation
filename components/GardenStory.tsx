@@ -14,25 +14,43 @@ export function GardenStory() {
   const [progress, setProgress] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
+  const targetProgress = useRef(0);
+  const progressRef = useRef(0);
 
   useEffect(() => {
     let frame = 0;
+    let lastTs = 0;
     const mobileQuery = window.matchMedia("(max-width: 520px)");
     const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     const updateViewport = () => setIsMobile(mobileQuery.matches);
     const updateMotion = () => setReduceMotion(motionQuery.matches);
-    const update = () => {
-      frame = 0;
+    const readScroll = () => {
       const chapter = chapterRef.current;
       if (!chapter) return;
       const rect = chapter.getBoundingClientRect();
       const travel = Math.max(1, chapter.offsetHeight - window.innerHeight);
-      setProgress(clamp(-rect.top / travel));
+      targetProgress.current = clamp(-rect.top / travel);
+    };
+    const tick = (now: number) => {
+      const dt = lastTs === 0 ? 16 : now - lastTs;
+      lastTs = now;
+      frame = 0;
+      const diff = targetProgress.current - progressRef.current;
+      if (Math.abs(diff) < 0.0012) {
+        progressRef.current = targetProgress.current;
+        setProgress(targetProgress.current);
+        return;
+      }
+      const alpha = 1 - Math.exp(-dt / 320);
+      progressRef.current += diff * alpha;
+      setProgress(progressRef.current);
+      frame = requestAnimationFrame(tick);
     };
     const schedule = () => {
-      if (!frame) frame = requestAnimationFrame(update);
+      readScroll();
+      if (!frame) frame = requestAnimationFrame(tick);
     };
-    update();
+    readScroll();
     updateViewport();
     updateMotion();
     window.addEventListener("scroll", schedule, { passive: true });
@@ -52,35 +70,26 @@ export function GardenStory() {
   const joinedChapter = smooth(
     (progress - (isMobile ? 0.76 : 0.7)) / (isMobile ? 0.18 : 0.2),
   );
-  const abdullahJourney = smooth(
-    firstChapter < 0.36
-      ? firstChapter * 1.25
-      : firstChapter < 0.52
-        ? 0.45
-        : 0.45 + (firstChapter - 0.52) * 1.15,
-  );
-  const yousraJourney = smooth(
-    firstChapter < 0.16
-      ? 0
-      : firstChapter < 0.62
-        ? (firstChapter - 0.16) * 1.35
-        : 0.62 + (firstChapter - 0.62),
-  );
+  // Their rhythms differ just enough to feel like two separate journeys,
+  // but vertical travel stays shared so both portraits stay level.
+  const verticalJourney = smooth(firstChapter);
+  const abdullahJourney = smooth(clamp(firstChapter * 1.06));
+  const yousraJourney = smooth(clamp((firstChapter - 0.1) * 1.18));
 
   const captionOpacity = clamp(1 - joinedChapter * 2.6);
   const chapterTitleOpacity = clamp(1 - joinedChapter * 2.4);
+  const baseTop = isMobile
+    ? 72 - verticalJourney * 41
+    : 69 - verticalJourney * 42;
+  const joinedTop = isMobile ? 29 : 34;
   const abdullahLeft = isMobile
     ? 20 + abdullahJourney * 18 - joinedChapter * 4
     : 17 + abdullahJourney * 23 + joinedChapter * 2;
   const yousraLeft = isMobile
     ? 80 - yousraJourney * 18 + joinedChapter * 4
     : 83 - yousraJourney * 23 - joinedChapter * 2;
-  const abdullahTop = isMobile
-    ? 72 - abdullahJourney * 41 + joinedChapter * 29
-    : 69 - abdullahJourney * 42 + joinedChapter * 34;
-  const yousraTop = isMobile
-    ? 66 - yousraJourney * 35 + joinedChapter * 29
-    : 69 - yousraJourney * 42 + joinedChapter * 34;
+  const abdullahTop = baseTop + joinedChapter * joinedTop;
+  const yousraTop = baseTop + joinedChapter * joinedTop;
 
   const rootStyle = {
     "--left-dash": 1 - firstChapter,
@@ -101,8 +110,8 @@ export function GardenStory() {
     "--finale-shift": `${(1 - joinedChapter) * 22}px`,
   } as React.CSSProperties;
 
-  const beat = (at: number, span = 0.13) =>
-    clamp(1 - Math.abs(progress - at) / span);
+  const beat = (at: number, span = 0.16) =>
+    smooth(clamp(1 - Math.abs(progress - at) / span));
   const finaleOpacity = smooth((progress - (isMobile ? 0.91 : 0.84)) / 0.08);
 
   if (reduceMotion) {
@@ -174,9 +183,9 @@ export function GardenStory() {
         </div>
 
         <div className="tp-milestones">
-          <p className="tp-beat" style={{ opacity: beat(0.13, 0.09) }}>Two beginnings</p>
-          <p className="tp-beat tp-beat--middle" style={{ opacity: beat(0.38, 0.09) }}>Two paths</p>
-          <p className="tp-beat tp-beat--promise" style={{ opacity: beat(0.62, 0.075) }}>One promise</p>
+          <p className="tp-beat" style={{ opacity: beat(0.13, 0.18) }}>Two beginnings</p>
+          <p className="tp-beat tp-beat--middle" style={{ opacity: beat(0.38, 0.18) }}>Two paths</p>
+          <p className="tp-beat tp-beat--promise" style={{ opacity: beat(0.62, 0.15) }}>One promise</p>
         </div>
 
         <div className="tp-final" style={{ opacity: finaleOpacity }} aria-hidden={finaleOpacity < 0.1}>
