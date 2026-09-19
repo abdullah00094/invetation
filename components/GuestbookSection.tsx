@@ -1,9 +1,10 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useRef, useState } from "react";
 import { Reveal } from "@/components/Reveal";
 import {
   type AttendanceResponse,
+  createWishIntentId,
   saveGuestbookWish,
 } from "@/lib/guestbook";
 
@@ -27,6 +28,10 @@ export function GuestbookSection() {
   const [errors, setErrors] = useState<Errors>({});
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  // One idempotency key per intent: created when the user starts a reply and
+  // reused on retries, so a re-click or flaky network can't double-insert.
+  // Regenerated after a successful submit ("Write another wish").
+  const intentId = useRef<string>(createWishIntentId());
 
   function validate(
     name: string,
@@ -60,15 +65,25 @@ export function GuestbookSection() {
 
     try {
       await saveGuestbookWish({
+        clientId: intentId.current,
         name,
         wish,
         attendance: attendance as AttendanceResponse,
       });
       setSubmitted(true);
       form.reset();
-    } catch {
+      intentId.current = createWishIntentId();
+    } catch (error) {
+      const requestId =
+        error instanceof Error && /request_id=([\w-]+)/.exec(error.message)?.[1];
+      console.error(
+        "[guestbook-form] submit failed",
+        error instanceof Error ? error.stack : error,
+      );
       setErrors({
-        submit: "We couldn't save your wish. Please check your connection and try again.",
+        submit: requestId
+          ? `We couldn't save your wish. Reference: ${requestId}`
+          : "We couldn't save your wish. Please check your connection and try again.",
       });
     } finally {
       setSubmitting(false);
@@ -92,7 +107,7 @@ export function GuestbookSection() {
             <div className="guestbook-success" role="status" aria-live="polite">
               <span aria-hidden>♡</span>
               <p>Your kind words are part of our story now.</p>
-              <button type="button" className="story-text-button" onClick={() => { setSubmitted(false); setErrors({}); }}>
+              <button type="button" className="story-text-button" onClick={() => { setSubmitted(false); setErrors({}); intentId.current = createWishIntentId(); }}>
                 Write another wish
               </button>
             </div>
@@ -132,7 +147,7 @@ export function GuestbookSection() {
                 <textarea id="guest-wish" name="wish" rows={5} minLength={3} maxLength={500} required aria-invalid={Boolean(errors.wish)} aria-describedby={errors.wish ? "guest-wish-error" : undefined} />
                 {errors.wish && <p className="field-error" id="guest-wish-error">{errors.wish}</p>}
               </div>
-              <button className="story-button" type="submit" disabled={submitting}>
+              <button className="guestbook-submit" type="submit" disabled={submitting}>
                 {submitting ? "Sending…" : "Send your wish"}
               </button>
               {errors.submit && (

@@ -45,8 +45,16 @@ export function CurtainOpeningScene({ onOpen }: { onOpen: () => void }) {
           <div className="paper-light" aria-hidden />
           <div className="floral-cluster floral-cluster--top" aria-hidden><i/><i/><i/><b/><b/></div>
           <div className="floral-cluster floral-cluster--bottom" aria-hidden><i/><i/><i/><b/><b/></div>
+          <div aria-hidden>
+            <span className="cover-petal cover-petal--1" />
+            <span className="cover-petal cover-petal--2" />
+            <span className="cover-petal cover-petal--3" />
+            <span className="cover-petal cover-petal--4" />
+            <span className="cover-petal cover-petal--5" />
+            <span className="cover-petal cover-petal--6" />
+          </div>
           <motion.div className="invitation-sheet" animate={opening ? { y: reduceMotion ? -20 : "-115%", opacity: 0, rotateX: reduceMotion ? 0 : -7 } : { y: 0, opacity: 1, rotateX: 0 }} transition={{ duration: reduceMotion ? .26 : 1.05, ease: [0.72, 0, 0.22, 1] }}>
-            <div className="invitation-frame" aria-hidden />
+            <div className="invitation-frame" aria-hidden><i /></div>
             <div className="cover-copy">
               <p className="cover-kicker">Together with joy</p>
               <h1 id="cover-title" className="cover-names">Abdullah <span>&amp;</span> Yousra</h1>

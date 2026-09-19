@@ -48,6 +48,16 @@ const pinyon = localFont({
   display: "swap",
 });
 
+const poppins = localFont({
+  variable: "--font-poppins",
+  src: [
+    { path: "./fonts/poppins-regular.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/poppins-medium.woff2", weight: "500", style: "normal" },
+    { path: "./fonts/poppins-semibold.woff2", weight: "600", style: "normal" },
+  ],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   metadataBase,
   title: site.meta.title,
@@ -92,7 +102,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${ptSerif.variable} ${arapey.variable} ${pinyon.variable} min-h-[100svh] overflow-x-hidden antialiased`}
+        className={`${ptSerif.variable} ${arapey.variable} ${pinyon.variable} ${poppins.variable} min-h-[100svh] overflow-x-hidden antialiased`}
       >
         <VisitTracker />
         <Providers>{children}</Providers>
