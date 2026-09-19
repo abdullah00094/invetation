@@ -19,6 +19,16 @@ alter table public.guestbook_wishes
 create index if not exists guestbook_wishes_created_at_idx
 on public.guestbook_wishes (created_at desc);
 
+-- Raise the DB wish-length cap from the old 500 to match the app (2000).
+-- The old constraint name may vary per install: drop whichever exists.
+alter table public.guestbook_wishes
+  drop constraint if exists guestbook_wishes_wish_check;
+alter table public.guestbook_wishes
+  drop constraint if exists guestbook_wishes_wish_length_check;
+alter table public.guestbook_wishes
+  add constraint guestbook_wishes_wish_check
+  check (char_length(wish) between 1 and 2000);
+
 -- Unique constraint = the race guard. Two concurrent inserts with the same
 -- client_id: the second blocks on the index, then hits the conflict clause,
 -- so exactly one row survives even without an outer transaction.

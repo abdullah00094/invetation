@@ -8,6 +8,31 @@ const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0
 const ATTENDANCE_VALUES = new Set(["yes", "maybe", "no"]);
 const NAME_MAX = 80;
 const WISH_MAX = 2000;
+const DEDUPE_LOOKBACK_HOURS = 48;
+
+/** Junk detection: a single character repeated in long runs, or one character
+ * making up >80% of the message (e.g. "kkkk…" x 2000). */
+function isJunkWish(wish: string) {
+  const compact = wish.replace(/\s+/g, "");
+  if (compact.length < 3) return false;
+  if (/(.)\1{15,}/.test(compact)) return true;
+  const counts = new Map<string, number>();
+  for (const char of compact.toLowerCase()) {
+    counts.set(char, (counts.get(char) ?? 0) + 1);
+  }
+  const maxShare = Math.max(...counts.values()) / compact.length;
+  return maxShare > 0.8;
+}
+
+/** Normalizes a wish for duplicate comparison: lowercase, collapse whitespace,
+ * stripemoji/punctuation so "Alf mabrouuk!!!" ≈ "alf mabrouuk". */
+function dedupeKey(wish: string) {
+  return wish
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
 
 type FailureReason =
   | "invalid_payload"
@@ -72,6 +97,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (isJunkWish(wish)) {
+      return logAndReject(context, "validation_failed", "Junk wish rejected.", 422, {
+        clientId,
+        name,
+        attendance,
+        wishLength: wish.length,
+      });
+    }
+
     if (isRateLimited(context.ip)) {
       return logAndReject(context, "rate_limited", "Too many requests from this IP.", 429, {
         clientId,
@@ -89,6 +123,33 @@ export async function POST(request: NextRequest) {
     };
 
     const supabase = createSupabaseAdmin();
+
+    // Duplicate-text dedupe: reject if an identical (normalized) wish was
+    // already saved recently — even from a different device/client id.
+    const lookbackIso = new Date(Date.now() - DEDUPE_LOOKBACK_HOURS * 3_600_000).toISOString();
+    const { data: recentWishes, error: recentError } = await supabase
+      .from("guestbook_wishes")
+      .select("wish")
+      .gte("created_at", lookbackIso)
+      .order("created_at", { ascending: false })
+      .limit(200);
+
+    if (recentError) {
+      console.error(
+        `[guestbook] dedupe lookup failed request_id=${requestId}: ${recentError.message} (proceeding with insert)`,
+      );
+    } else {
+      const incomingKey = dedupeKey(wish);
+      if (incomingKey.length >= 10 && recentWishes?.some((row) => dedupeKey(row.wish) === incomingKey)) {
+        return logAndReject(context, "validation_failed", "Duplicate wish text rejected.", 409, {
+          clientId,
+          name,
+          attendance,
+          wishLength: wish.length,
+        });
+      }
+    }
+
     const { error } = await supabase
       .from("guestbook_wishes")
       .upsert(

@@ -14,7 +14,33 @@ export type GuestbookWish = {
 export type SaveWishResult = {
   ok: boolean;
   requestId?: string;
+  reason?: "duplicate" | "junk" | "rate_limited" | "invalid" | "server_error";
 };
+
+export class WishSaveError extends Error {
+  reason: NonNullable<SaveWishResult["reason"]>;
+  requestId?: string;
+
+  constructor(
+    message: string,
+    reason: NonNullable<SaveWishResult["reason"]>,
+    requestId?: string,
+  ) {
+    super(message);
+    this.name = "WishSaveError";
+    this.reason = reason;
+    this.requestId = requestId;
+  }
+}
+
+/** Maps an HTTP status from the API to a client-facing failure reason. */
+function reasonFromStatus(status: number): NonNullable<SaveWishResult["reason"]> {
+  if (status === 409) return "duplicate";
+  if (status === 422) return "junk";
+  if (status === 429) return "rate_limited";
+  if (status === 400) return "invalid";
+  return "server_error";
+}
 
 /** Generates the per-intent idempotency key sent with every submit attempt. */
 export function createWishIntentId(): string {
@@ -51,10 +77,11 @@ export async function saveGuestbookWish(
 
   if (!response.ok || !payload?.ok) {
     const message = payload?.error ?? `Wish request failed with status ${response.status}.`;
+    const reason = reasonFromStatus(response.status);
     console.error(
-      `[guestbook-client] save failed status=${response.status} request_id=${payload?.requestId ?? "n/a"}: ${message}`,
+      `[guestbook-client] save failed status=${response.status} reason=${reason} request_id=${payload?.requestId ?? "n/a"}: ${message}`,
     );
-    throw new Error(message);
+    throw new WishSaveError(message, reason, payload?.requestId);
   }
 
   console.info(

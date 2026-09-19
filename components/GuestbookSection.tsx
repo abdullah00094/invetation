@@ -6,6 +6,7 @@ import {
   type AttendanceResponse,
   createWishIntentId,
   saveGuestbookWish,
+  WishSaveError,
 } from "@/lib/guestbook";
 
 type Errors = {
@@ -14,6 +15,22 @@ type Errors = {
   wish?: string;
   submit?: string;
 };
+
+const WISH_MAX = 2000;
+
+/** Catches junk wishes: a single character repeated run after run, or one
+ * character dominating the whole message (e.g. "kkkkk…" x 2000). */
+function isJunkWish(wish: string) {
+  const compact = wish.replace(/\s+/g, "");
+  if (compact.length < 3) return false;
+  if (/(.)\1{15,}/.test(compact)) return true;
+  const counts = new Map<string, number>();
+  for (const char of compact.toLowerCase()) {
+    counts.set(char, (counts.get(char) ?? 0) + 1);
+  }
+  const maxShare = Math.max(...counts.values()) / compact.length;
+  return maxShare > 0.8;
+}
 
 const attendanceOptions: ReadonlyArray<{
   value: AttendanceResponse;
@@ -45,7 +62,8 @@ export function GuestbookSection() {
       next.attendance = "Please let us know if you can join us.";
     }
     if (wish.length < 3) next.wish = "Please leave a wish of at least 3 characters.";
-    else if (wish.length > 500) next.wish = "Please keep your wish under 500 characters.";
+    else if (wish.length > WISH_MAX) next.wish = `Please keep your wish under ${WISH_MAX} characters.`;
+    else if (isJunkWish(wish)) next.wish = "That wish looks a little empty — please write a few kind words.";
     return next;
   }
 
@@ -74,17 +92,22 @@ export function GuestbookSection() {
       form.reset();
       intentId.current = createWishIntentId();
     } catch (error) {
-      const requestId =
-        error instanceof Error && /request_id=([\w-]+)/.exec(error.message)?.[1];
       console.error(
         "[guestbook-form] submit failed",
         error instanceof Error ? error.stack : error,
       );
-      setErrors({
-        submit: requestId
-          ? `We couldn't save your wish. Reference: ${requestId}`
-          : "We couldn't save your wish. Please check your connection and try again.",
-      });
+      const reason = error instanceof WishSaveError ? error.reason : null;
+      const requestId = error instanceof WishSaveError ? error.requestId : undefined;
+      const copy = reason === "duplicate"
+        ? "That wish was already posted just now — no need to post it twice."
+        : reason === "junk"
+          ? "That wish looks a little empty — please write a few kind words."
+          : reason === "rate_limited"
+            ? "A few wishes came from here just now — please wait a minute and try again."
+            : requestId
+              ? `We couldn't save your wish. Reference: ${requestId}`
+              : "We couldn't save your wish. Please check your connection and try again.";
+      setErrors({ submit: copy });
     } finally {
       setSubmitting(false);
     }
@@ -144,7 +167,7 @@ export function GuestbookSection() {
               </fieldset>
               <div className="guestbook-field">
                 <label htmlFor="guest-wish">Leave us a wish</label>
-                <textarea id="guest-wish" name="wish" rows={5} minLength={3} maxLength={500} required aria-invalid={Boolean(errors.wish)} aria-describedby={errors.wish ? "guest-wish-error" : undefined} />
+                <textarea id="guest-wish" name="wish" rows={5} minLength={3} maxLength={WISH_MAX} required aria-invalid={Boolean(errors.wish)} aria-describedby={errors.wish ? "guest-wish-error" : undefined} />
                 {errors.wish && <p className="field-error" id="guest-wish-error">{errors.wish}</p>}
               </div>
               <button className="guestbook-submit" type="submit" disabled={submitting}>
