@@ -7,7 +7,7 @@ export const runtime = "nodejs";
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const ATTENDANCE_VALUES = new Set(["yes", "maybe", "no"]);
 const NAME_MAX = 80;
-const WISH_MAX = 500;
+const WISH_MAX = 2000;
 
 type FailureReason =
   | "invalid_payload"
