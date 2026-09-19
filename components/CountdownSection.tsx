@@ -81,7 +81,7 @@ export function CountdownSection() {
             </div>
           )}
         </motion.div>
-        <div className="countdown-date"><p>Sunday · October 4 · 2026</p><span>7:00 PM · Cairo</span></div>
+        <div className="countdown-date"><p>Sunday · October 4 · 2026</p><span>7:00 PM · Cairo Time</span></div>
         <p className="countdown-closing">Abdullah <span>&amp;</span> Yousra</p>
       </div>
     </section>
