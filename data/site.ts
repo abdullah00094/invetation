@@ -72,8 +72,8 @@ export const site = {
     },
   ],
   venue: {
-    name: "El Mwasah Wedding Venue & Elderly Care",
-    addressLines: ["El Mwasah Wedding Venue & Elderly Care"],
+    name: "El Mwasah Wedding Venue ",
+    addressLines: ["El Mwasah Wedding Venue"],
     note: "",
     mapUrl: "https://maps.app.goo.gl/2gqKsSTddCCDBzNB8",
   },
