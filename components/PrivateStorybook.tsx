@@ -142,19 +142,23 @@ function LeafingBook({
   const [turn, setTurn] = useState<{ from: number; to: number; direction: TurnDirection } | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const turningRef = useRef(false);
+  const pointerRef = useRef<{ id: number; startX: number; startY: number; startedAt: number; eligible: boolean } | null>(null);
+  const [showGestureHint, setShowGestureHint] = useState(mode === "page");
   const isTurning = turn !== null;
   const displayIndex = turn?.to ?? currentIndex;
 
   const navigate = useCallback((direction: TurnDirection) => {
-    if (turningRef.current) return;
+    if (turningRef.current) return false;
     const delta = direction === "forward" ? 1 : -1;
     const target = currentIndex + delta;
-    if (target < 0 || target >= collections.length) return;
+    if (target < 0 || target >= collections.length) return false;
+
+    setShowGestureHint(false);
 
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduceMotion) {
       setCurrentIndex(target);
-      return;
+      return true;
     }
 
     turningRef.current = true;
@@ -165,6 +169,7 @@ function LeafingBook({
       turningRef.current = false;
       timerRef.current = null;
     }, 680);
+    return true;
   }, [collections.length, currentIndex]);
 
   useEffect(() => () => {
@@ -177,13 +182,55 @@ function LeafingBook({
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
       const target = event.target;
-      if (target instanceof HTMLElement && (target.isContentEditable || target.closest("input, textarea, select, [contenteditable='true']"))) return;
+      if (target instanceof HTMLElement && (target.isContentEditable || target.closest("input, textarea, select, [contenteditable='true'], [data-storybook-gesture-surface]"))) return;
       if (event.key === "ArrowLeft") navigate("backward");
       if (event.key === "ArrowRight") navigate("forward");
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [keyboardActive, navigate]);
+
+  const onPaperKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+    if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+      event.preventDefault();
+      navigate(event.key === "ArrowLeft" ? "backward" : "forward");
+    }
+  };
+
+  const onPaperPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (mode !== "page" || isTurning || !event.isPrimary) return;
+    const target = event.target as HTMLElement;
+    pointerRef.current = {
+      id: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      startedAt: performance.now(),
+      eligible: !target.closest("blockquote, a, button, input, textarea, select, [contenteditable='true']"),
+    };
+  };
+
+  const clearPointer = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (pointerRef.current?.id === event.pointerId) pointerRef.current = null;
+  };
+
+  const onPaperPointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
+    const pointer = pointerRef.current;
+    pointerRef.current = null;
+    if (mode !== "page" || !pointer || pointer.id !== event.pointerId || !pointer.eligible || isTurning) return;
+    const dx = event.clientX - pointer.startX;
+    const dy = event.clientY - pointer.startY;
+    if (Math.abs(dx) >= 46 && Math.abs(dx) > Math.abs(dy) * 1.25) {
+      navigate(dx < 0 ? "forward" : "backward");
+      return;
+    }
+    const isTap = Math.abs(dx) <= 10 && Math.abs(dy) <= 10 && performance.now() - pointer.startedAt <= 550;
+    if (!isTap || window.getSelection()?.toString()) return;
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const position = (event.clientX - bounds.left) / bounds.width;
+    if (position <= 0.3) navigate("backward");
+    if (position >= 0.7) navigate("forward");
+  };
 
   const renderCollection = (collectionIndex: number, layer: "base" | "turning") => {
     const collection = collections[collectionIndex];
@@ -203,7 +250,19 @@ function LeafingBook({
 
   return (
     <>
-      <div className={`storybook-book-stage ${turn ? `storybook-book-stage--${turn.direction}` : ""}`} aria-busy={isTurning}>
+      {mode === "page" && showGestureHint ? <p className="storybook-gesture-hint" id="storybook-gesture-hint">Swipe or tap the page to leaf through</p> : null}
+      <div
+        className={`storybook-book-stage ${mode === "page" ? "storybook-book-stage--gesture" : ""} ${turn ? `storybook-book-stage--${turn.direction}` : ""}`}
+        aria-busy={isTurning}
+        aria-label={mode === "page" ? "Interactive book page. Swipe left or tap the right edge for the next page; swipe right or tap the left edge for the previous page." : undefined}
+        aria-describedby={mode === "page" && showGestureHint ? "storybook-gesture-hint" : undefined}
+        data-storybook-gesture-surface={mode === "page" ? "true" : undefined}
+        onKeyDown={mode === "page" ? onPaperKeyDown : undefined}
+        onPointerCancel={mode === "page" ? clearPointer : undefined}
+        onPointerDown={mode === "page" ? onPaperPointerDown : undefined}
+        onPointerUp={mode === "page" ? onPaperPointerUp : undefined}
+        tabIndex={mode === "page" ? 0 : undefined}
+      >
         {renderCollection(displayIndex, "base")}
         {turn ? renderCollection(turn.from, "turning") : null}
         <span className={`storybook-leafing-label ${isTurning ? "is-visible" : ""}`} aria-hidden="true">Leafing through</span>
