@@ -27,7 +27,23 @@ alter table public.guestbook_wishes
   drop constraint if exists guestbook_wishes_wish_length_check;
 alter table public.guestbook_wishes
   add constraint guestbook_wishes_wish_check
-  check (char_length(wish) between 1 and 2000);
+  check (char_length(btrim(wish)) between 3 and 2000) not valid;
+
+-- Match browser and API validation at the database boundary too.
+alter table public.guestbook_wishes
+  drop constraint if exists guestbook_wishes_name_check;
+alter table public.guestbook_wishes
+  add constraint guestbook_wishes_name_check
+  check (char_length(btrim(name)) between 2 and 80) not valid;
+
+alter table public.guestbook_wishes
+  drop constraint if exists guestbook_wishes_attendance_check;
+alter table public.guestbook_wishes
+  add constraint guestbook_wishes_attendance_check
+  check (attendance in ('yes', 'maybe', 'no')) not valid;
+
+alter table public.guestbook_wishes
+  alter column created_at set default now();
 
 -- Unique constraint = the race guard. Two concurrent inserts with the same
 -- client_id: the second blocks on the index, then hits the conflict clause,
@@ -68,3 +84,21 @@ alter table public.guestbook_wishes enable row level security;
 
 drop policy if exists "anon can insert wishes" on public.guestbook_wishes;
 revoke insert on table public.guestbook_wishes from anon, authenticated;
+
+-- Keep canonical timestamps as timestamptz, and expose Cairo-local values for
+-- easy reading in Supabase Table Editor / SQL queries.
+create or replace view public.guestbook_wishes_cairo
+with (security_invoker = true)
+as
+select
+  wishes.*,
+  timezone('Africa/Cairo', wishes.created_at) as created_at_cairo
+from public.guestbook_wishes as wishes;
+
+create or replace view public.guestbook_failure_logs_cairo
+with (security_invoker = true)
+as
+select
+  failures.*,
+  timezone('Africa/Cairo', failures.created_at) as created_at_cairo
+from public.guestbook_failure_logs as failures;

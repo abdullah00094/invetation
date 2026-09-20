@@ -1,28 +1,19 @@
 import { randomUUID } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase-admin";
+import {
+  GUEST_NAME_MAX,
+  GUEST_NAME_MIN,
+  GUEST_WISH_MAX,
+  GUEST_WISH_MIN,
+  isGuestAttendance,
+  isJunkWish,
+} from "@/lib/guestbook-validation";
 
 export const runtime = "nodejs";
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const ATTENDANCE_VALUES = new Set(["yes", "maybe", "no"]);
-const NAME_MAX = 80;
-const WISH_MAX = 2000;
 const DEDUPE_LOOKBACK_HOURS = 48;
-
-/** Junk detection: a single character repeated in long runs, or one character
- * making up >80% of the message (e.g. "kkkk…" x 2000). */
-function isJunkWish(wish: string) {
-  const compact = wish.replace(/\s+/g, "");
-  if (compact.length < 3) return false;
-  if (/(.)\1{15,}/.test(compact)) return true;
-  const counts = new Map<string, number>();
-  for (const char of compact.toLowerCase()) {
-    counts.set(char, (counts.get(char) ?? 0) + 1);
-  }
-  const maxShare = Math.max(...counts.values()) / compact.length;
-  return maxShare > 0.8;
-}
 
 /** Normalizes a wish for duplicate comparison: lowercase, collapse whitespace,
  * stripemoji/punctuation so "Alf mabrouuk!!!" ≈ "alf mabrouuk". */
@@ -83,9 +74,9 @@ export async function POST(request: NextRequest) {
 
     const validation: Record<string, string> = {};
     if (!UUID_PATTERN.test(clientId)) validation.clientId = "missing";
-    if (name.length < 2 || name.length > NAME_MAX) validation.name = "length";
-    if (wish.length < 3 || wish.length > WISH_MAX) validation.wish = "length";
-    if (!ATTENDANCE_VALUES.has(attendance)) validation.attendance = "unknown";
+    if (name.length < GUEST_NAME_MIN || name.length > GUEST_NAME_MAX) validation.name = "length";
+    if (wish.length < GUEST_WISH_MIN || wish.length > GUEST_WISH_MAX) validation.wish = "length";
+    if (!isGuestAttendance(attendance)) validation.attendance = "unknown";
 
     if (Object.keys(validation).length > 0) {
       return logAndReject(
@@ -94,6 +85,7 @@ export async function POST(request: NextRequest) {
         `Validation failed: ${JSON.stringify(validation)}`,
         422,
         { clientId, name, attendance, wishLength: wish.length },
+        "invalid",
       );
     }
 
@@ -103,7 +95,7 @@ export async function POST(request: NextRequest) {
         name,
         attendance,
         wishLength: wish.length,
-      });
+      }, "junk");
     }
 
     if (isRateLimited(context.ip)) {
@@ -214,19 +206,34 @@ type FailureContext = {
   wishLength?: number;
 };
 
+type PublicFailureReason = "duplicate" | "junk" | "rate_limited" | "invalid" | "server_error";
+
 function logAndReject(
   context: RequestContext,
   reason: FailureReason,
   message: string,
   status: number,
   failure: FailureContext = {},
+  publicReason?: PublicFailureReason,
 ) {
   console.error(`[guestbook] ${reason} request_id=${context.requestId}: ${message}`);
   logFailure(context, reason, message, failure).catch(() => {});
   return NextResponse.json(
-    { ok: false, requestId: context.requestId, error: "We couldn't save your wish. Please try again." },
+    {
+      ok: false,
+      requestId: context.requestId,
+      reason: publicReason ?? reasonFromFailureStatus(status),
+      error: "We couldn't save your wish. Please try again.",
+    },
     { status },
   );
+}
+
+function reasonFromFailureStatus(status: number): PublicFailureReason {
+  if (status === 409) return "duplicate";
+  if (status === 429) return "rate_limited";
+  if (status === 400 || status === 422) return "invalid";
+  return "server_error";
 }
 
 async function logFailure(
@@ -241,7 +248,7 @@ async function logFailure(
       request_id: context.requestId,
       reason,
       client_id: failure.clientId && UUID_PATTERN.test(failure.clientId) ? failure.clientId : null,
-      payload_name: failure.name?.slice(0, NAME_MAX) ?? null,
+      payload_name: failure.name?.slice(0, GUEST_NAME_MAX) ?? null,
       payload_attendance: failure.attendance?.slice(0, 20) ?? null,
       payload_wish_length: typeof failure.wishLength === "number" ? failure.wishLength : null,
       error_message: message.slice(0, 1000),

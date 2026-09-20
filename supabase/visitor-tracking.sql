@@ -109,3 +109,16 @@ to service_role;
 
 create index if not exists site_visitors_last_visited_at_idx
 on public.site_visitors (last_visited_at desc);
+
+-- Keep canonical timestamps as timestamptz, and expose Cairo-local values for
+-- easy reading in Supabase Table Editor / SQL queries.
+create or replace view public.site_visitors_cairo
+with (security_invoker = true)
+as
+select
+  visitors.*,
+  timezone('Africa/Cairo', visitors.first_visited_at) as first_visited_at_cairo,
+  timezone('Africa/Cairo', visitors.last_visited_at) as last_visited_at_cairo,
+  timezone('Africa/Cairo', visitors.first_opened_at) as first_opened_at_cairo,
+  timezone('Africa/Cairo', visitors.last_opened_at) as last_opened_at_cairo
+from public.site_visitors as visitors;

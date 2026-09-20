@@ -72,12 +72,12 @@ export async function saveGuestbookWish(
   });
 
   const payload = (await response.json().catch(() => null)) as
-    | { ok?: boolean; requestId?: string; error?: string }
+    | { ok?: boolean; requestId?: string; error?: string; reason?: SaveWishResult["reason"] }
     | null;
 
   if (!response.ok || !payload?.ok) {
     const message = payload?.error ?? `Wish request failed with status ${response.status}.`;
-    const reason = reasonFromStatus(response.status);
+    const reason = payload?.reason ?? reasonFromStatus(response.status);
     console.error(
       `[guestbook-client] save failed status=${response.status} reason=${reason} request_id=${payload?.requestId ?? "n/a"}: ${message}`,
     );

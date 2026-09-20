@@ -8,6 +8,14 @@ import {
   saveGuestbookWish,
   WishSaveError,
 } from "@/lib/guestbook";
+import {
+  GUEST_NAME_MAX,
+  GUEST_NAME_MIN,
+  GUEST_WISH_MAX,
+  GUEST_WISH_MIN,
+  isGuestAttendance,
+  isJunkWish,
+} from "@/lib/guestbook-validation";
 
 type Errors = {
   name?: string;
@@ -15,22 +23,6 @@ type Errors = {
   wish?: string;
   submit?: string;
 };
-
-const WISH_MAX = 2000;
-
-/** Catches junk wishes: a single character repeated run after run, or one
- * character dominating the whole message (e.g. "kkkkk…" x 2000). */
-function isJunkWish(wish: string) {
-  const compact = wish.replace(/\s+/g, "");
-  if (compact.length < 3) return false;
-  if (/(.)\1{15,}/.test(compact)) return true;
-  const counts = new Map<string, number>();
-  for (const char of compact.toLowerCase()) {
-    counts.set(char, (counts.get(char) ?? 0) + 1);
-  }
-  const maxShare = Math.max(...counts.values()) / compact.length;
-  return maxShare > 0.8;
-}
 
 const attendanceOptions: ReadonlyArray<{
   value: AttendanceResponse;
@@ -56,13 +48,13 @@ export function GuestbookSection() {
     wish: string,
   ) {
     const next: Errors = {};
-    if (name.length < 2) next.name = "Please enter at least 2 characters.";
-    else if (name.length > 80) next.name = "Please keep your name under 80 characters.";
-    if (!attendanceOptions.some((option) => option.value === attendance)) {
+    if (name.length < GUEST_NAME_MIN) next.name = `Please enter at least ${GUEST_NAME_MIN} characters.`;
+    else if (name.length > GUEST_NAME_MAX) next.name = `Please keep your name under ${GUEST_NAME_MAX} characters.`;
+    if (!isGuestAttendance(attendance)) {
       next.attendance = "Please let us know if you can join us.";
     }
-    if (wish.length < 3) next.wish = "Please leave a wish of at least 3 characters.";
-    else if (wish.length > WISH_MAX) next.wish = `Please keep your wish under ${WISH_MAX} characters.`;
+    if (wish.length < GUEST_WISH_MIN) next.wish = `Please leave a wish of at least ${GUEST_WISH_MIN} characters.`;
+    else if (wish.length > GUEST_WISH_MAX) next.wish = `Please keep your wish under ${GUEST_WISH_MAX} characters.`;
     else if (isJunkWish(wish)) next.wish = "That wish looks a little empty — please write a few kind words.";
     return next;
   }
@@ -138,7 +130,7 @@ export function GuestbookSection() {
             <form onSubmit={handleSubmit} noValidate>
               <div className="guestbook-field">
                 <label htmlFor="guest-name">Your name</label>
-                <input id="guest-name" name="name" type="text" autoComplete="name" minLength={2} maxLength={80} required aria-invalid={Boolean(errors.name)} aria-describedby={errors.name ? "guest-name-error" : undefined} />
+                <input id="guest-name" name="name" type="text" autoComplete="name" minLength={GUEST_NAME_MIN} maxLength={GUEST_NAME_MAX} required aria-invalid={Boolean(errors.name)} aria-describedby={errors.name ? "guest-name-error" : undefined} />
                 {errors.name && <p className="field-error" id="guest-name-error">{errors.name}</p>}
               </div>
               <fieldset
@@ -167,7 +159,7 @@ export function GuestbookSection() {
               </fieldset>
               <div className="guestbook-field">
                 <label htmlFor="guest-wish">Leave us a wish</label>
-                <textarea id="guest-wish" name="wish" rows={5} minLength={3} maxLength={WISH_MAX} required aria-invalid={Boolean(errors.wish)} aria-describedby={errors.wish ? "guest-wish-error" : undefined} />
+                <textarea id="guest-wish" name="wish" rows={5} minLength={GUEST_WISH_MIN} maxLength={GUEST_WISH_MAX} required aria-invalid={Boolean(errors.wish)} aria-describedby={errors.wish ? "guest-wish-error" : undefined} />
                 {errors.wish && <p className="field-error" id="guest-wish-error">{errors.wish}</p>}
               </div>
               <button className="guestbook-submit" type="submit" disabled={submitting}>
