@@ -20,7 +20,8 @@ export default async function StorybookPage() {
     const { data, error } = await supabase
       .from("guestbook_wishes")
       .select("id, name, wish, attendance, created_at")
-      .order("created_at", { ascending: true });
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: false });
 
     if (error) throw error;
     wishes = (data ?? []).flatMap((row) => {
